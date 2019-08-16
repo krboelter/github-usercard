@@ -24,7 +24,6 @@
           user, and adding that card to the DOM.
 */
 
-const followersArray = [];
 
 /* Step 3: Create a function that accepts a single object as its only argument,
           Using DOM methods and properties, create a component that will return the following DOM element:
@@ -54,6 +53,79 @@ const followersArray = [];
   bigknell
 */
 
-axios.get('https://api.github.com/users/krboelter') {
-  
+const followersArray = [];
+const followingArray = [];
+let myFollowers;
+let peopleFollowing;
+
+const cardsSection = document.querySelector('.cards');
+axios.get('https://api.github.com/users/krboelter')
+  .then(userData => {
+    let followersArray = [];
+    axios.get('https://api.github.com/users/krboelter/followers')
+      .then(followers => {
+        followersArray = followers.data.map(follower => follower.login)
+
+        followersArray.forEach(followerLogin => {
+          axios.get(`https://api.github.com/users/${followerLogin}`)
+            .then(followerData => {
+              cardsSection.appendChild(createCard(followerData.data))
+            })
+            .catch(error => console.error(error))
+        })
+      })
+      .catch(error => console.error(error))
+    cardsSection.appendChild(createCard(userData.data));
+  })
+  .catch(error => {
+    console.error(error)
+  })
+
+
+function createCard(obj, followers) {
+  let div = document.createElement('div');
+  div.classList.add('card')
+
+  let img = document.createElement('img');
+  img.src = obj.avatar_url
+  div.appendChild(img)
+
+  let cardInfoDiv = document.createElement('div');
+  cardInfoDiv.classList.add('card-info')
+  div.appendChild(cardInfoDiv)
+
+  let h3 = document.createElement('h3');
+  h3.classList.add('name')
+  h3.textContent = `${obj.name}`
+  cardInfoDiv.appendChild(h3)
+
+  let userNameP = document.createElement('p');
+  userNameP.classList.add('username')
+  userNameP.textContent = `${obj.login}`
+  cardInfoDiv.appendChild(userNameP)
+
+  let locationP = document.createElement('p');
+  locationP.textContent = `Location: ${obj.location}`
+  cardInfoDiv.appendChild(locationP)
+
+  let profileP = document.createElement('p');
+  let a = document.createElement('a');
+  a.href = `${obj.html_url}`
+  a.textContent = `Profile: ${obj.html_url}`
+  profileP.appendChild(a)
+  cardInfoDiv.appendChild(profileP)
+
+  let followersP = document.createElement('p');
+  followersP.textContent = `Followers: ${obj.followers}`
+  cardInfoDiv.appendChild(followersP)
+
+  let followingP = document.createElement('p');
+  followingP.textContent = `Following: ${obj.following}`
+  cardInfoDiv.appendChild(followingP)
+
+  let bioP = document.createElement('p');
+  bioP.textContent = `${obj.bio}`
+  cardInfoDiv.appendChild(bioP)
+
+  return div
 }
